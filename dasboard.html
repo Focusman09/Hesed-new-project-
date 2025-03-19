@@ -2,17 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard</title>
+  <title>Customer Details</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
     .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
     input, select { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; }
-    button { padding: 8px; margin: 5px 0; width: auto; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button { padding: 8px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
     button:hover { background: #0056b3; }
-    .actions button { width: auto; margin-right: 5px; }
-    .data-entry { padding: 10px; border: 1px solid #ccc; margin: 10px 0; border-radius: 5px; background: #f9f9f9; }
+    .edit-btn { background: #ffc107; }
+    .delete-btn { background: #dc3545; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background: #007bff; color: white; }
     .hidden { display: none; }
-    .copy-btn, .small-btn { background: #28a745; padding: 5px; }
+    .confirmation { color: green; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -28,7 +31,18 @@
   <button onclick="addData()">Add Entry</button>
 
   <h3>Your Entries</h3>
-  <div id="dataList"></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Firm Name</th>
+        <th>Contact Person</th>
+        <th>Nation</th>
+        <th>Phone</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="dataList"></tbody>
+  </table>
 
   <h3>Payment Section</h3>
   <p>Status: <span id="paymentStatus"></span></p>
@@ -52,7 +66,7 @@
     </select>
 
     <div id="bankDetails" class="hidden">
-      <p>Account Number: 6312412879 <button class="copy-btn" onclick="copyAccount()">Copy</button></p>
+      <p>Account Number: 6312412879 <button onclick="copyAccount()">Copy</button></p>
       <p>Bank: Fidelity Bank</p>
       <p>Account Name: Hesed Agbadu Oghenakhwami</p>
     </div>
@@ -66,61 +80,97 @@
     <h4>Upload Proof of Transfer</h4>
     <input type="file" id="paymentProof">
     <button onclick="confirmPayment()">Submit Payment</button>
+    <p id="paymentMessage"></p>
   </div>
-
-  <button class="small-btn" onclick="logout()">Logout</button>
 </div>
 
 <script>
-const username = localStorage.getItem('loggedInUser');
-const users = JSON.parse(localStorage.getItem('users')) || {};
-const user = users[username] || { userData: [], isPaid: false };
-localStorage.setItem('users', JSON.stringify(users));
-
-if (!user) {
-  alert('Please login first!');
-  window.location.href = 'login.html';
-}
-
-document.getElementById('username').innerText = username;
-document.getElementById('paymentStatus').innerText = user.isPaid ? 'Paid' : 'Pending';
-
-function openPaymentOptions() {
-  document.getElementById('paymentOptions').classList.remove('hidden');
-  document.getElementById('paymentMethod').addEventListener('change', function () {
-    document.getElementById('bankDetails').classList.toggle('hidden', this.value !== 'Bank Transfer');
-    document.getElementById('cardDetails').classList.toggle('hidden', this.value !== 'Card');
-  });
-}
-
-function confirmPayment() {
-  const method = document.getElementById('paymentMethod').value;
-  const proof = document.getElementById('paymentProof').files[0];
-  
-  if (method === 'Bank Transfer' && !proof) {
-    alert('Please upload payment proof.');
-    return;
+document.addEventListener("DOMContentLoaded", function () {
+  const username = localStorage.getItem('loggedInUser');
+  if (!username) {
+    alert('Please log in first!');
+    window.location.href = 'login.html';
   }
 
-  user.isPaid = true;
-  localStorage.setItem('users', JSON.stringify(users));
-  alert('Payment submitted! AI will verify it shortly.');
-  window.location.href = 'thankyou.html';
-}
+  document.getElementById('username').innerText = username;
+  const users = JSON.parse(localStorage.getItem('users')) || {};
+  const user = users[username] || { userData: [], isPaid: false };
 
-function copyAccount() {
-  navigator.clipboard.writeText('6312412879');
-  alert('Account number copied!');
-}
+  document.getElementById('paymentStatus').innerText = user.isPaid ? 'Paid' : 'Pending';
 
-function logout() {
-  localStorage.removeItem('loggedInUser');
-  window.location.href = 'login.html';
-}
+  function openPaymentOptions() {
+    document.getElementById('paymentOptions').classList.remove('hidden');
+    document.getElementById('paymentMethod').addEventListener('change', function () {
+      document.getElementById('bankDetails').classList.toggle('hidden', this.value !== 'Bank Transfer');
+      document.getElementById('cardDetails').classList.toggle('hidden', this.value !== 'Card');
+    });
+  }
+
+  function confirmPayment() {
+    const proof = document.getElementById('paymentProof').files[0];
+    if (!proof) {
+      alert('Please upload proof of payment!');
+      return;
+    }
+    document.getElementById('paymentMessage').innerText = 'Your payment is under review';
+    setTimeout(() => {
+      document.getElementById('paymentMessage').innerText = 'Your payment has been confirmed ✅';
+      setTimeout(() => {
+        const submitBtn = document.createElement('button');
+        submitBtn.innerText = 'Submit';
+        submitBtn.onclick = function() {
+          window.location.href = 'thankyou.html';
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 4000);
+        };
+        document.getElementById('paymentOptions').appendChild(submitBtn);
+      }, 2000);
+    }, 3000);
+  }
+
+  function copyAccount() {
+    navigator.clipboard.writeText('6312412879');
+    alert('Account number copied!');
+  }
+
+  function addData() {
+    const firm = document.getElementById('firm').value;
+    const person = document.getElementById('person').value;
+    const nation = document.getElementById('nation').value;
+    const phone = document.getElementById('phone').value;
+    if (!firm || !person || !nation || !phone) {
+      alert("All fields must be filled out!");
+      return;
+    }
+
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+      <td>${firm}</td>
+      <td>${person}</td>
+      <td>${nation}</td>
+      <td>${phone}</td>
+      <td>
+        <button class="edit-btn">Edit</button>
+        <button class="delete-btn" onclick="this.parentElement.parentElement.remove()">Delete</button>
+      </td>
+    `;
+    document.getElementById('dataList').appendChild(newRow);
+
+    document.getElementById('firm').value = "";
+    document.getElementById('person').value = "";
+    document.getElementById('nation').value = "";
+    document.getElementById('phone').value = "";
+  }
+
+  window.addData = addData;
+  window.openPaymentOptions = openPaymentOptions;
+  window.confirmPayment = confirmPayment;
+  window.copyAccount = copyAccount;
+});
 </script>
 
 </body>
 </html>
+
 
 
 
