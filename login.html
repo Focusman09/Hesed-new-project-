@@ -4,10 +4,33 @@
   <meta charset="UTF-8">
   <title>Login to Hesed Website</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #e0f7fa; display: flex; justify-content: center; align-items: center; height: 100vh; }
-    .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 300px; }
-    input, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
-    button { background: #007bff; color: white; border: none; }
+    body { 
+      font-family: Arial, sans-serif; 
+      background: url('https://source.unsplash.com/1600x900/?nature,forest') no-repeat center center/cover; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      height: 100vh; 
+    }
+    .container { 
+      background: white; 
+      padding: 20px; 
+      border-radius: 10px; 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+      width: 300px; 
+    }
+    input, button { 
+      width: 100%; 
+      padding: 10px; 
+      margin: 10px 0; 
+      border-radius: 5px; 
+      border: 1px solid #ccc; 
+    }
+    button { 
+      background: #007bff; 
+      color: white; 
+      border: none; 
+    }
     label { font-size: 14px; }
   </style>
 </head>
@@ -23,7 +46,6 @@
 </div>
 
 <script>
-// Login function supporting old data (email as key)
 function login() {
   const usernameInput = document.getElementById('username').value.trim();
   const passwordInput = document.getElementById('password').value;
@@ -33,9 +55,8 @@ function login() {
 
   for (const key in users) {
     const user = users[key];
-    // Check if username matches and password matches
     if (user.username === usernameInput && user.password === passwordInput) {
-      localStorage.setItem('loggedInUser', key); // Store the original key (email or username as key)
+      localStorage.setItem('loggedInUser', key); 
       alert('Login successful!');
       window.location.href = 'dasboard.html';
       found = true;
@@ -48,7 +69,6 @@ function login() {
   }
 }
 
-// Show password function
 function togglePassword() {
   const passwordField = document.getElementById('password');
   passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
