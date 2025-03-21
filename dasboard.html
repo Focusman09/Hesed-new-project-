@@ -45,69 +45,117 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  document.getElementById('username').innerText = localStorage.getItem('loggedInUser') || 'Guest';
-
-  function addData() {
-    const firm = document.getElementById('firm').value;
-    const person = document.getElementById('person').value;
-    const nation = document.getElementById('nation').value;
-    const phone = document.getElementById('phone').value;
-    if (!firm || !person || !nation || !phone) {
-      alert("All fields must be filled out!");
-      return;
+  document.addEventListener("DOMContentLoaded", function () {
+    const username = localStorage.getItem('loggedInUser');
+    if (!username) {
+      alert('Please log in first!');
+      window.location.href = 'index.html';
     }
-
-    const newRow = document.createElement('tr');
-    newRow.innerHTML = `
-      <td contenteditable="false">${firm}</td>
-      <td contenteditable="false">${person}</td>
-      <td contenteditable="false">${nation}</td>
-      <td contenteditable="false">${phone}</td>
-      <td>
-        <button class="edit-btn" onclick="toggleEdit(this)">Edit</button>
-        <button class="modify-btn" onclick="modifyRow(this)" style="display:none;">Modify</button>
-        <button class="done-btn" onclick="doneEditing(this)" style="display:none;">Done</button>
-        <button class="delete-btn" onclick="this.parentElement.parentElement.remove()">Delete</button>
-      </td>
-    `;
-    document.getElementById('dataList').appendChild(newRow);
-    document.getElementById('firm').value = "";
-    document.getElementById('person').value = "";
-    document.getElementById('nation').value = "";
-    document.getElementById('phone').value = "";
-  }
-
-  window.addData = addData;
-
-  window.toggleEdit = function (button) {
-    const row = button.parentElement.parentElement;
-    const modifyBtn = row.querySelector('.modify-btn');
-    const doneBtn = row.querySelector('.done-btn');
-    button.style.display = 'none';
-    modifyBtn.style.display = 'inline';
-    doneBtn.style.display = 'inline';
-  };
-
-  window.modifyRow = function (button) {
-    const row = button.parentElement.parentElement;
-    const cells = row.querySelectorAll('td[contenteditable="false"]');
-    cells.forEach(cell => cell.contentEditable = "true");
-  };
-
-  window.doneEditing = function (button) {
-    const row = button.parentElement.parentElement;
-    const cells = row.querySelectorAll('td[contenteditable="true"]');
-    cells.forEach(cell => cell.contentEditable = "false");
-    row.querySelector('.edit-btn').style.display = 'inline';
-    row.querySelector('.modify-btn').style.display = 'none';
-    row.querySelector('.done-btn').style.display = 'none';
-  };
-});
-</script>
-
-</body>
-</html>
+  
+    document.getElementById('username').innerText = username;
+    const users = JSON.parse(localStorage.getItem('users')) || {};
+    const user = users[username] || { userData: [], isPaid: false };
+  
+    document.getElementById('paymentStatus').innerText = user.isPaid ? 'Paid' : 'Pending';
+  
+    function openPaymentOptions() {
+      document.getElementById('paymentOptions').classList.remove('hidden');
+      document.getElementById('paymentMethod').addEventListener('change', function () {
+        document.getElementById('bankDetails').classList.toggle('hidden', this.value !== 'Bank Transfer');
+        document.getElementById('cardDetails').classList.toggle('hidden', this.value !== 'Card');
+      });
+    }
+  
+    function confirmPayment() {
+      const proof = document.getElementById('paymentProof').files[0];
+      if (!proof) {
+        alert('Please upload proof of payment!');
+        return;
+      }
+      document.getElementById('paymentMessage').innerText = 'Your payment is under review';
+      setTimeout(() => {
+        document.getElementById('paymentMessage').innerText = 'Your payment has been confirmed ✅';
+        setTimeout(() => {
+          const submitBtn = document.createElement('button');
+          submitBtn.innerText = 'Submit';
+          submitBtn.onclick = function() {
+            window.location.href = 'thankyou.html';
+            setTimeout(() => { window.location.href = 'dashboard.html'; }, 4000);
+          };
+          document.getElementById('paymentOptions').appendChild(submitBtn);
+        }, 2000);
+      }, 3000);
+    }
+  
+    function copyAccount() {
+      navigator.clipboard.writeText('6312412879');
+      alert('Account number copied!');
+    }
+  
+    function addData() {
+      const firm = document.getElementById('firm').value;
+      const person = document.getElementById('person').value;
+      const nation = document.getElementById('nation').value;
+      const phone = document.getElementById('phone').value;
+      if (!firm || !person || !nation || !phone) {
+        alert("All fields must be filled out!");
+        return;
+      }
+  
+      const newRow = document.createElement('tr');
+      newRow.innerHTML = `
+        <td contenteditable="false">${firm}</td>
+        <td contenteditable="false">${person}</td>
+        <td contenteditable="false">${nation}</td>
+        <td contenteditable="false">${phone}</td>
+        <td>
+          <button class="edit-btn" onclick="toggleEdit(this)">Edit</button>
+          <button class="modify-btn hidden" onclick="modifyRow(this)">Modify</button>
+          <button class="done-btn hidden" onclick="doneEditing(this)">Done</button>
+          <button class="delete-btn" onclick="this.parentElement.parentElement.remove()">Delete</button>
+        </td>
+      `;
+      document.getElementById('dataList').appendChild(newRow);
+  
+      document.getElementById('firm').value = "";
+      document.getElementById('person').value = "";
+      document.getElementById('nation').value = "";
+      document.getElementById('phone').value = "";
+    }
+  
+    // ✅ Adding the missing functions here:
+    window.addData = addData;
+  
+    window.toggleEdit = function (button) {
+      const row = button.parentElement.parentElement;
+      const modifyBtn = row.querySelector('.modify-btn');
+      const doneBtn = row.querySelector('.done-btn');
+      button.style.display = 'none';
+      modifyBtn.style.display = 'inline';
+      doneBtn.style.display = 'inline';
+    };
+  
+    window.modifyRow = function (button) {
+      const row = button.parentElement.parentElement;
+      const cells = row.querySelectorAll('td[contenteditable="false"]');
+      cells.forEach(cell => cell.contentEditable = "true");
+    };
+  
+    window.doneEditing = function (button) {
+      const row = button.parentElement.parentElement;
+      const cells = row.querySelectorAll('td[contenteditable="true"]');
+      cells.forEach(cell => cell.contentEditable = "false");
+      row.querySelector('.edit-btn').style.display = 'inline';
+      row.querySelector('.modify-btn').style.display = 'none';
+      row.querySelector('.done-btn').style.display = 'none';
+    };
+  
+    window.openPaymentOptions = openPaymentOptions;
+    window.confirmPayment = confirmPayment;
+    window.copyAccount = copyAccount;
+  });
+  </script>
+  
 
 
 
