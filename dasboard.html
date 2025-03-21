@@ -12,15 +12,55 @@
     .edit-btn { background: #ffc107; }
     .delete-btn { background: #dc3545; }
     .modify-btn, .done-btn { display: none; }
+    .hidden { display: none; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
     th { background: #007bff; color: white; }
+    .payment-container { margin-top: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 10px; background: #f9f9f9; }
+    .bank-details, .card-details { display: none; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <h2>Welcome, <span id="username"></span>!</h2>
+  <p>Payment Status: <span id="paymentStatus">Pending</span></p>
+  <button onclick="openPaymentOptions()">Make Payment</button>
+
+  <div id="paymentOptions" class="payment-container hidden">
+    <h4>Select Duration</h4>
+    <select id="durationSelect">
+      <option value="647.36">10 Months - $647.36</option>
+      <option value="500.00">7 Months - $500.00</option>
+      <option value="350.00">5 Months - $350.00</option>
+      <option value="210.00">3 Months - $210.00</option>
+      <option value="100.00">1 Month - $100.00</option>
+    </select>
+    
+    <h4>Select Payment Method</h4>
+    <select id="paymentMethod" onchange="togglePaymentDetails()">
+      <option value="Bank Transfer">Bank Transfer</option>
+      <option value="Card">Card</option>
+      <option value="Online Payment">Online Payment</option>
+    </select>
+    
+    <div id="bankDetails" class="bank-details">
+      <p>Account Number: 6312412879 <button onclick="copyAccount()">Copy</button></p>
+      <p>Bank: Fidelity Bank</p>
+      <p>Account Name: Hesed Agbadu Oghenakhwami</p>
+    </div>
+    
+    <div id="cardDetails" class="card-details">
+      <input type="text" id="cardNumber" placeholder="Card Number">
+      <input type="text" id="expiryDate" placeholder="Expiration Date">
+      <input type="text" id="cvv" placeholder="CVV">
+    </div>
+    
+    <h4>Upload Proof of Transfer</h4>
+    <input type="file" id="paymentProof">
+    <button onclick="confirmPayment()">Submit Payment</button>
+    <p id="paymentMessage"></p>
+  </div>
 
   <h3>Enter Company Details</h3>
   <input type="text" id="firm" placeholder="Firm Name">
@@ -45,117 +85,88 @@
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const username = localStorage.getItem('loggedInUser');
-    if (!username) {
-      alert('Please log in first!');
-      window.location.href = 'index.html';
-    }
+function openPaymentOptions() {
+  document.getElementById('paymentOptions').classList.remove('hidden');
+}
+
+function togglePaymentDetails() {
+  const method = document.getElementById('paymentMethod').value;
+  document.getElementById('bankDetails').style.display = method === 'Bank Transfer' ? 'block' : 'none';
+  document.getElementById('cardDetails').style.display = method === 'Card' ? 'block' : 'none';
+}
+
+function confirmPayment() {
+  const proof = document.getElementById('paymentProof').files[0];
+  if (!proof) {
+    alert('Please upload proof of payment!');
+    return;
+  }
+  document.getElementById('paymentMessage').innerText = 'Your payment is under review';
+  setTimeout(() => {
+    document.getElementById('paymentMessage').innerText = 'Your payment has been confirmed ✅';
+    document.getElementById('paymentStatus').innerText = 'Paid';
+  }, 3000);
+}
+
+function copyAccount() {
+  navigator.clipboard.writeText('6312412879');
+  alert('Account number copied!');
+}
+
+function addData() {
+  const firm = document.getElementById('firm').value;
+  const person = document.getElementById('person').value;
+  const nation = document.getElementById('nation').value;
+  const phone = document.getElementById('phone').value;
   
-    document.getElementById('username').innerText = username;
-    const users = JSON.parse(localStorage.getItem('users')) || {};
-    const user = users[username] || { userData: [], isPaid: false };
-  
-    document.getElementById('paymentStatus').innerText = user.isPaid ? 'Paid' : 'Pending';
-  
-    function openPaymentOptions() {
-      document.getElementById('paymentOptions').classList.remove('hidden');
-      document.getElementById('paymentMethod').addEventListener('change', function () {
-        document.getElementById('bankDetails').classList.toggle('hidden', this.value !== 'Bank Transfer');
-        document.getElementById('cardDetails').classList.toggle('hidden', this.value !== 'Card');
-      });
-    }
-  
-    function confirmPayment() {
-      const proof = document.getElementById('paymentProof').files[0];
-      if (!proof) {
-        alert('Please upload proof of payment!');
-        return;
-      }
-      document.getElementById('paymentMessage').innerText = 'Your payment is under review';
-      setTimeout(() => {
-        document.getElementById('paymentMessage').innerText = 'Your payment has been confirmed ✅';
-        setTimeout(() => {
-          const submitBtn = document.createElement('button');
-          submitBtn.innerText = 'Submit';
-          submitBtn.onclick = function() {
-            window.location.href = 'thankyou.html';
-            setTimeout(() => { window.location.href = 'dashboard.html'; }, 4000);
-          };
-          document.getElementById('paymentOptions').appendChild(submitBtn);
-        }, 2000);
-      }, 3000);
-    }
-  
-    function copyAccount() {
-      navigator.clipboard.writeText('6312412879');
-      alert('Account number copied!');
-    }
-  
-    function addData() {
-      const firm = document.getElementById('firm').value;
-      const person = document.getElementById('person').value;
-      const nation = document.getElementById('nation').value;
-      const phone = document.getElementById('phone').value;
-      if (!firm || !person || !nation || !phone) {
-        alert("All fields must be filled out!");
-        return;
-      }
-  
-      const newRow = document.createElement('tr');
-      newRow.innerHTML = `
-        <td contenteditable="false">${firm}</td>
-        <td contenteditable="false">${person}</td>
-        <td contenteditable="false">${nation}</td>
-        <td contenteditable="false">${phone}</td>
-        <td>
-          <button class="edit-btn" onclick="toggleEdit(this)">Edit</button>
-          <button class="modify-btn hidden" onclick="modifyRow(this)">Modify</button>
-          <button class="done-btn hidden" onclick="doneEditing(this)">Done</button>
-          <button class="delete-btn" onclick="this.parentElement.parentElement.remove()">Delete</button>
-        </td>
-      `;
-      document.getElementById('dataList').appendChild(newRow);
-  
-      document.getElementById('firm').value = "";
-      document.getElementById('person').value = "";
-      document.getElementById('nation').value = "";
-      document.getElementById('phone').value = "";
-    }
-  
-    // ✅ Adding the missing functions here:
-    window.addData = addData;
-  
-    window.toggleEdit = function (button) {
-      const row = button.parentElement.parentElement;
-      const modifyBtn = row.querySelector('.modify-btn');
-      const doneBtn = row.querySelector('.done-btn');
-      button.style.display = 'none';
-      modifyBtn.style.display = 'inline';
-      doneBtn.style.display = 'inline';
-    };
-  
-    window.modifyRow = function (button) {
-      const row = button.parentElement.parentElement;
-      const cells = row.querySelectorAll('td[contenteditable="false"]');
-      cells.forEach(cell => cell.contentEditable = "true");
-    };
-  
-    window.doneEditing = function (button) {
-      const row = button.parentElement.parentElement;
-      const cells = row.querySelectorAll('td[contenteditable="true"]');
-      cells.forEach(cell => cell.contentEditable = "false");
-      row.querySelector('.edit-btn').style.display = 'inline';
-      row.querySelector('.modify-btn').style.display = 'none';
-      row.querySelector('.done-btn').style.display = 'none';
-    };
-  
-    window.openPaymentOptions = openPaymentOptions;
-    window.confirmPayment = confirmPayment;
-    window.copyAccount = copyAccount;
-  });
-  </script>
-  
+  if (!firm || !person || !nation || !phone) {
+    alert("All fields must be filled out!");
+    return;
+  }
+
+  const newRow = document.createElement('tr');
+  newRow.innerHTML = `
+    <td>${firm}</td>
+    <td>${person}</td>
+    <td>${nation}</td>
+    <td>${phone}</td>
+    <td>
+      <button class="edit-btn" onclick="toggleEdit(this)">Edit</button>
+      <button class="modify-btn" onclick="modifyRow(this)">Modify</button>
+      <button class="done-btn" onclick="doneEditing(this)">Done</button>
+      <button class="delete-btn" onclick="this.parentElement.parentElement.remove()">Delete</button>
+    </td>
+  `;
+  document.getElementById('dataList').appendChild(newRow);
+}
+
+function toggleEdit(button) {
+  const row = button.parentElement.parentElement;
+  const inputs = row.querySelectorAll('td:not(:last-child)');
+  inputs.forEach(cell => cell.contentEditable = "true");
+  button.style.display = "none";
+  row.querySelector('.modify-btn').style.display = "inline";
+  row.querySelector('.done-btn').style.display = "inline";
+}
+
+function modifyRow(button) {
+  alert("Modify the data directly in the table and click Done when finished.");
+}
+
+function doneEditing(button) {
+  const row = button.parentElement.parentElement;
+  const inputs = row.querySelectorAll('td:not(:last-child)');
+  inputs.forEach(cell => cell.contentEditable = "false");
+  row.querySelector('.edit-btn').style.display = "inline";
+  button.style.display = "none";
+  row.querySelector('.modify-btn').style.display = "none";
+}
+</script>
+</body>
+</html>
+
+
+
 
 
 
