@@ -1,191 +1,378 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Simple modal styling */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      max-width: 500px;
+      width: 90%;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    .modal-content input {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 5px;
+    }
+    .hidden { display: none; }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1 id="welcomeUser"></h1>
-        <button onclick="logout()">Logout</button>
+  <div class="container">
+    <h1 id="welcomeUser"></h1>
+    <button onclick="logout()">Logout</button>
 
-        <h2>Add Entry</h2>
-        <form id="entryForm">
-            Firm Name: <input type="text" id="firmName"><br>
-            Location: <input type="text" id="location"><br>
-            Years in Operation: <input type="text" id="years"><br>
-            Description: <input type="text" id="description"><br>
-            Contact Person: <input type="text" id="contactPerson"><br>
-            Email: <input type="email" id="email"><br>
-            Phone: <input type="text" id="phone"><br>
-            <button type="button" onclick="addEntry()">Add Entry</button>
-        </form>
+    <h2>Add Entry</h2>
+    <form id="entryForm">
+      Firm Name: <input type="text" id="firmName" required><br>
+      Location: <input type="text" id="location" required><br>
+      Years in Operation: <input type="number" id="years" required><br>
+      Description: <input type="text" id="description" required><br>
+      Contact Person: <input type="text" id="contactPerson" required><br>
+      Email: <input type="email" id="email" required><br>
+      Phone: <input type="tel" id="phone" required><br>
+      <button type="button" onclick="addEntry()">Add Entry</button>
+    </form>
 
-        <h2>Entries</h2>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Firm Name</th>
-                    <th>Location</th>
-                    <th>Years</th>
-                    <th>Description</th>
-                    <th>Contact Person</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Edit</th>
-                    <th>Delete</th>
-                </tr>
-            </thead>
-            <tbody id="entriesTableBody"></tbody>
-        </table>
+    <h2>Entries</h2>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Firm Name</th>
+          <th>Location</th>
+          <th>Years</th>
+          <th>Description</th>
+          <th>Contact Person</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Edit</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody id="entriesTableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="container">
+    <h2>Welcome, <span id="username"></span>!</h2>
+    <p>Payment Status: <span id="paymentStatus">Pending</span></p>
+    <button onclick="openPaymentOptions()">Make Payment</button>
+
+    <div id="paymentOptions" class="payment-container hidden">
+      <h4>Select Duration</h4>
+      <select id="durationSelect">
+        <option value="647.36">10 Months - $647.36</option>
+        <option value="500.00">7 Months - $500.00</option>
+        <option value="350.00">5 Months - $350.00</option>
+        <option value="210.00">3 Months - $210.00</option>
+        <option value="100.00">1 Month - $100.00</option>
+      </select>
+
+      <h4>Select Payment Method</h4>
+      <select id="paymentMethod" onchange="togglePaymentDetails()">
+        <option value="Bank Transfer">Bank Transfer</option>
+        <option value="Card">Card</option>
+        <option value="Online Payment">Online Payment</option>
+      </select>
+
+      <div id="bankDetails" class="bank-details hidden">
+        <p>Account Number: 6312412879 <button onclick="copyAccount()">Copy</button></p>
+        <p>Bank: Fidelity Bank</p>
+        <p>Account Name: Hesed Agbadu Oghenakhwami</p>
+      </div>
+
+      <div id="cardDetails" class="card-details hidden">
+        <input type="text" id="cardNumber" placeholder="Card Number">
+        <input type="text" id="expiryDate" placeholder="Expiration Date">
+        <input type="text" id="cvv" placeholder="CVV">
+      </div>
+
+      <h4>Upload Proof of Transfer</h4>
+      <input type="file" id="paymentProof">
+      <button onclick="confirmPayment()">Submit Payment</button>
+      <p id="paymentMessage"></p>
     </div>
+  </div>
 
-    <div class="container">
-        <h2>Welcome, <span id="username"></span>!</h2>
-        <p>Payment Status: <span id="paymentStatus">Pending</span></p>
-        <button onclick="openPaymentOptions()">Make Payment</button>
-        <p>You are now logged in.</p>
-        <button onclick="logout()">Logout</button>
+  <h3>Your Entries</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Firm Name</th>
+        <th>Contact Person</th>
+        <th>Nation</th>
+        <th>Phone</th>
+        <th>Payment Mode</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="dataList"></tbody>
+  </table>
 
-        <div id="paymentOptions" class="payment-container hidden">
-            <h4>Select Duration</h4>
-            <select id="durationSelect">
-                <option value="647.36">10 Months - $647.36</option>
-                <option value="500.00">7 Months - $500.00</option>
-                <option value="350.00">5 Months - $350.00</option>
-                <option value="210.00">3 Months - $210.00</option>
-                <option value="100.00">1 Month - $100.00</option>
-            </select>
+  <button onclick="submitForm()">Submit</button>
 
-            <h4>Select Payment Method</h4>
-            <select id="paymentMethod" onchange="togglePaymentDetails()">
-                <option value="Bank Transfer">Bank Transfer</option>
-                <option value="Card">Card</option>
-                <option value="Online Payment">Online Payment</option>
-            </select>
+  <!-- Modals will be dynamically created -->
 
-            <div id="bankDetails" class="bank-details">
-                <p>Account Number: 6312412879 <button onclick="copyAccount()">Copy</button></p>
-                <p>Bank: Fidelity Bank</p>
-                <p>Account Name: Hesed Agbadu Oghenakhwami</p>
-            </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      loadUserData();
+      displayEntries();
+    });
 
-            <div id="cardDetails" class="card-details">
-                <input type="text" id="cardNumber" placeholder="Card Number">
-                <input type="text" id="expiryDate" placeholder="Expiration Date">
-                <input type="text" id="cvv" placeholder="CVV">
-            </div>
+    function loadUserData() {
+      let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+      if (!currentUser) {
+        window.location.href = "index.html";
+        return;
+      }
+      document.getElementById("welcomeUser").innerText = `Welcome, ${currentUser.name}`;
+      document.getElementById("username").innerText = currentUser.name;
+    }
 
-            <h4>Upload Proof of Transfer</h4>
-            <input type="file" id="paymentProof">
-            <button onclick="confirmPayment()">Submit Payment</button>
-            <p id="paymentMessage"></p>
+    function addEntry() {
+      let firmName = document.getElementById("firmName").value.trim();
+      let location = document.getElementById("location").value.trim();
+      let years = document.getElementById("years").value.trim();
+      let description = document.getElementById("description").value.trim();
+      let contactPerson = document.getElementById("contactPerson").value.trim();
+      let email = document.getElementById("email").value.trim();
+      let phone = document.getElementById("phone").value.trim();
+
+      if (!firmName || !location || !years || !description || !contactPerson || !email || !phone) {
+        alert("Please fill all fields before submitting.");
+        return;
+      }
+
+      let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+      let entries = JSON.parse(localStorage.getItem("entries")) || [];
+      let newEntry = {
+        id: entries.length + 1,
+        firmName,
+        location,
+        years,
+        description,
+        contactPerson,
+        email,
+        phone,
+        user: currentUser.email
+      };
+
+      entries.push(newEntry);
+      localStorage.setItem("entries", JSON.stringify(entries));
+      displayEntries();
+      document.getElementById("entryForm").reset();
+    }
+
+    // This function displays the entries in the table with Edit and Delete buttons.
+    function displayEntries() {
+      let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+      if (!currentUser) return;
+      let entries = JSON.parse(localStorage.getItem("entries")) || [];
+      let userEntries = entries.filter(entry => entry.user === currentUser.email);
+      let tableBody = document.getElementById("entriesTableBody");
+      tableBody.innerHTML = "";
+      userEntries.forEach((entry, index) => {
+        let row = `<tr id="row-${entry.id}">
+          <td>${index + 1}</td>
+          <td>${entry.firmName}</td>
+          <td>${entry.location}</td>
+          <td>${entry.years}</td>
+          <td>${entry.description}</td>
+          <td>${entry.contactPerson}</td>
+          <td>${entry.email}</td>
+          <td>${entry.phone}</td>
+          <td><button onclick="editEntry(${entry.id})">Edit</button></td>
+          <td><button onclick="deleteEntry(${entry.id})">Delete</button></td>
+        </tr>`;
+        tableBody.innerHTML += row;
+      });
+    }
+
+    // EDIT ENTRY: Opens a modal with entry details.
+    function editEntry(id) {
+      let entries = JSON.parse(localStorage.getItem("entries")) || [];
+      let entry = entries.find(e => e.id === id);
+      if (!entry) return;
+
+      // Create modal overlay
+      let overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      overlay.id = "editModal";
+
+      // Modal content with input fields (initially read-only)
+      overlay.innerHTML = `
+        <div class="modal-content">
+          <h3>Edit Entry</h3>
+          <label>Firm Name:</label><br>
+          <input type="text" id="editFirmName" value="${entry.firmName}" readonly><br>
+          <label>Location:</label><br>
+          <input type="text" id="editLocation" value="${entry.location}" readonly><br>
+          <label>Years in Operation:</label><br>
+          <input type="number" id="editYears" value="${entry.years}" readonly><br>
+          <label>Description:</label><br>
+          <input type="text" id="editDescription" value="${entry.description}" readonly><br>
+          <label>Contact Person:</label><br>
+          <input type="text" id="editContactPerson" value="${entry.contactPerson}" readonly><br>
+          <label>Email:</label><br>
+          <input type="email" id="editEmail" value="${entry.email}" readonly><br>
+          <label>Phone:</label><br>
+          <input type="tel" id="editPhone" value="${entry.phone}" readonly><br><br>
+          <button id="modifyBtn">Modify</button>
+          <button id="doneBtn" disabled>Done</button>
+          <button onclick="closeModal('editModal')">Cancel</button>
         </div>
+      `;
+      document.body.appendChild(overlay);
 
-        <h3>Your Entries</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Firm Name</th>
-                    <th>Contact Person</th>
-                    <th>Nation</th>
-                    <th>Phone</th>
-                    <th>Payment Mode</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="dataList"></tbody>
-        </table>
+      // When Modify is clicked, make fields editable and enable Done button.
+      document.getElementById("modifyBtn").addEventListener("click", function () {
+        document.getElementById("editFirmName").readOnly = false;
+        document.getElementById("editLocation").readOnly = false;
+        document.getElementById("editYears").readOnly = false;
+        document.getElementById("editDescription").readOnly = false;
+        document.getElementById("editContactPerson").readOnly = false;
+        document.getElementById("editEmail").readOnly = false;
+        document.getElementById("editPhone").readOnly = false;
+        document.getElementById("doneBtn").disabled = false;
+      });
 
-        <button onclick="submitForm()">Submit</button>
-    </div>
+      // When Done is clicked, update the entry and refresh the table.
+      document.getElementById("doneBtn").addEventListener("click", function () {
+        entry.firmName = document.getElementById("editFirmName").value.trim();
+        entry.location = document.getElementById("editLocation").value.trim();
+        entry.years = document.getElementById("editYears").value.trim();
+        entry.description = document.getElementById("editDescription").value.trim();
+        entry.contactPerson = document.getElementById("editContactPerson").value.trim();
+        entry.email = document.getElementById("editEmail").value.trim();
+        entry.phone = document.getElementById("editPhone").value.trim();
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            loadUserData();
-            displayEntries();
-        });
+        // Save the updated entries back to localStorage.
+        let allEntries = JSON.parse(localStorage.getItem("entries")) || [];
+        let index = allEntries.findIndex(e => e.id === id);
+        allEntries[index] = entry;
+        localStorage.setItem("entries", JSON.stringify(allEntries));
+        displayEntries();
+        closeModal("editModal");
+      });
+    }
 
-        function loadUserData() {
-            let currentUser = JSON.parse(localStorage.getItem("currentUser"));
-            if (!currentUser) {
-                window.location.href = "index.html";
-                return;
-            }
-            document.getElementById("welcomeUser").innerText = `Welcome, ${currentUser.name}`;
-        }
+    // DELETE ENTRY: Opens a confirmation modal.
+    function deleteEntry(id) {
+      let overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      overlay.id = "deleteModal";
+      overlay.innerHTML = `
+        <div class="modal-content">
+          <h3>Confirm Delete</h3>
+          <p>Are you sure you want to delete this entry?</p>
+          <button id="deleteOk">Ok</button>
+          <button onclick="closeModal('deleteModal')">Cancel</button>
+        </div>
+      `;
+      document.body.appendChild(overlay);
 
-        function addEntry() {
-            let firmName = document.getElementById("firmName").value.trim();
-            let location = document.getElementById("location").value.trim();
-            let years = document.getElementById("years").value.trim();
-            let description = document.getElementById("description").value.trim();
-            let contactPerson = document.getElementById("contactPerson").value.trim();
-            let email = document.getElementById("email").value.trim();
-            let phone = document.getElementById("phone").value.trim();
+      document.getElementById("deleteOk").addEventListener("click", function () {
+        let entries = JSON.parse(localStorage.getItem("entries")) || [];
+        entries = entries.filter(e => e.id !== id);
+        localStorage.setItem("entries", JSON.stringify(entries));
+        displayEntries();
+        closeModal("deleteModal");
+      });
+    }
 
-            if (!firmName || !location || !years || !description || !contactPerson || !email || !phone) {
-                alert("Please fill all fields before submitting.");
-                return;
-            }
+    // Closes the modal with the given id.
+    function closeModal(modalId) {
+      let modal = document.getElementById(modalId);
+      if (modal) {
+        document.body.removeChild(modal);
+      }
+    }
 
-            let currentUser = JSON.parse(localStorage.getItem("currentUser"));
-            let entries = JSON.parse(localStorage.getItem("entries")) || [];
-            let newEntry = {
-                id: entries.length + 1,
-                firmName, location, years, description, contactPerson, email, phone,
-                user: currentUser.email
-            };
+    function confirmPayment() {
+      const proof = document.getElementById('paymentProof').files[0];
+      const paymentMethod = document.getElementById('paymentMethod').value;
+      const paymentAmount = document.getElementById('durationSelect').value;
 
-            entries.push(newEntry);
-            localStorage.setItem("entries", JSON.stringify(entries));
-            displayEntries();
-            document.getElementById("entryForm").reset();
-        }
+      if (paymentMethod === "Bank Transfer" && !proof) {
+        alert('Please upload proof of payment!');
+        return;
+      }
 
-        function confirmPayment() {
-            const proof = document.getElementById('paymentProof').files[0];
-            const paymentMethod = document.getElementById('paymentMethod').value;
-            const paymentAmount = document.getElementById('durationSelect').value;
+      document.getElementById('paymentMessage').innerText = 'Your payment is under review';
 
-            if (paymentMethod === "Bank Transfer" && !proof) {
-                alert('Please upload proof of payment!');
-                return;
-            }
+      setTimeout(() => {
+        document.getElementById('paymentMessage').innerText = 'Your payment has been confirmed ✅';
+        document.getElementById('paymentStatus').innerText = 'Paid';
+        generateInvoice(paymentMethod, paymentAmount);
+      }, 2000);
+    }
 
-            document.getElementById('paymentMessage').innerText = 'Your payment is under review';
+    function generateInvoice(method, amount) {
+      const invoiceContent = `
+Invoice
+Payment Method: ${method}
+Amount Paid: $${amount}
+      `;
+      const blob = new Blob([invoiceContent], { type: 'application/pdf' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'Invoice.pdf';
+      link.click();
+    }
 
-            setTimeout(() => {
-                document.getElementById('paymentMessage').innerText = 'Your payment has been confirmed ✅';
-                document.getElementById('paymentStatus').innerText = 'Paid';
-                generateInvoice(paymentMethod, paymentAmount);
-            }, 2000);
-        }
+    function logout() {
+      localStorage.removeItem("currentUser");
+      window.location.href = "index.html";
+    }
 
-        function generateInvoice(method, amount) {
-            const invoiceContent = `
-                Invoice\n
-                Payment Method: ${method}\n
-                Amount Paid: $${amount}\n
-            `;
+    // Dummy functions for Payment Options and Copy (you can adjust these as needed)
+    function openPaymentOptions() {
+      document.getElementById("paymentOptions").classList.toggle("hidden");
+    }
 
-            const blob = new Blob([invoiceContent], { type: 'application/pdf' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'Invoice.pdf';
-            link.click();
-        }
+    function togglePaymentDetails() {
+      let method = document.getElementById("paymentMethod").value;
+      document.getElementById("bankDetails").classList.add("hidden");
+      document.getElementById("cardDetails").classList.add("hidden");
+      if (method === "Bank Transfer") {
+        document.getElementById("bankDetails").classList.remove("hidden");
+      } else if (method === "Card") {
+        document.getElementById("cardDetails").classList.remove("hidden");
+      }
+    }
 
-        function logout() {
-            localStorage.removeItem("currentUser");
-            window.location.href = "index.html";
-        }
-    </script>
+    function copyAccount() {
+      let accountNumber = "6312412879";
+      navigator.clipboard.writeText(accountNumber).then(() => {
+        alert("Account number copied to clipboard!");
+      });
+    }
 
+    // Dummy submitForm function (you can adjust as needed)
+    function submitForm() {
+      alert("Form submitted!");
+    }
+  </script>
 </body>
 </html>
 

@@ -61,7 +61,7 @@
   <img src="https://i.imgur.com/6VBx3io.png" alt="Avatar" class="avatar">
   <h2>Login</h2>
   <form id="loginForm">
-      Email: <input type="email" id="loginEmail" required><br>
+    Username: <input type="Username" id="loginUsername" required><br>
       Password: <input type="password" id="loginPassword" required>
       <div class="checkbox-container">
         <label><input type="checkbox" onclick="togglePassword()"> Show Password</label>
@@ -80,11 +80,11 @@
   }
 
   function login() {
-      let email = document.getElementById("loginEmail").value.trim();
+      let Username = document.getElementById("loginUsername").value.trim();
       let password = document.getElementById("loginPassword").value.trim();
       let users = JSON.parse(localStorage.getItem("users")) ?? {};
 
-      let foundUser = users[email];
+      let foundUser = users[Username];
       if (foundUser.password === password) {
           localStorage.setItem("currentUser", JSON.stringify(foundUser));
           alert('Login successful! Redirecting to dasboard...');
