@@ -1,50 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Thank You</title>
-  <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      background: url('https://source.unsplash.com/1600x900/?business,office') no-repeat center center/cover;
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      height: 100vh; 
-    }
-    .message { 
-      background: white; 
-      padding: 30px; 
-      border-radius: 10px; 
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-      text-align: center; 
-    }
-    button { 
-      padding: 10px 20px; 
-      background: #007bff; 
-      color: white; 
-      border: none; 
-      border-radius: 5px; 
-      margin-top: 20px; 
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+            if (!currentUser) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            document.getElementById("thankYouMessage").innerHTML = 
+                `<h1>Thank You, ${currentUser.name}!</h1>
+                 <p>Your submission has been received.</p>
+                 <p><strong>Email:</strong> ${currentUser.email}</p>`;
+        });
+
+        function goToDashboard() {
+            window.location.href = "dasboard.html";
+        }
+    </script>
 </head>
 <body>
-
-<div class="message">
-  <h2>Thank You for Your Payment!</h2>
-  <p>Your payment was successful. You can now enjoy all features.</p>
-  <button onclick="goDashboard()">Go to Customer Details</button>
-</div>
-
-<script>
-function goDashboard() {
-  window.location.href = 'dasboard.html';
-}
-</script>
-
+    <div id="thankYouMessage"></div>
+    <button onclick="goToDashboard()">Back to Dashboard</button>
 </body>
 </html>
+
 
 
 

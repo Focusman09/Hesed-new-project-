@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login to Hesed Website</title>
   <style>
     body { 
@@ -11,68 +12,87 @@
       justify-content: center; 
       align-items: center; 
       height: 100vh; 
+      margin: 0; 
     }
     .container { 
-      background: white; 
-      padding: 20px; 
+      background: rgba(255, 255, 255, 0.9); 
+      padding: 25px; 
       border-radius: 10px; 
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-      width: 300px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+      width: 350px; 
+      text-align: center;
     }
+    h2 { color: #333; }
     input, button { 
       width: 100%; 
-      padding: 10px; 
+      padding: 12px; 
       margin: 10px 0; 
       border-radius: 5px; 
       border: 1px solid #ccc; 
+      font-size: 16px;
     }
     button { 
       background: #007bff; 
       color: white; 
       border: none; 
+      cursor: pointer; 
     }
-    label { font-size: 14px; }
+    button:hover { background: #0056b3; }
+    .checkbox-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    .avatar { 
+      width: 80px; 
+      height: 80px; 
+      border-radius: 50%; 
+      margin-bottom: 10px; 
+    }
+    a { color: #007bff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
 
 <div class="container">
+  <img src="https://i.imgur.com/6VBx3io.png" alt="Avatar" class="avatar">
   <h2>Login</h2>
-  <input type="text" id="username" placeholder="Username" required>
-  <input type="password" id="password" placeholder="Password" required>
-  <label><input type="checkbox" onclick="togglePassword()"> Show Password</label>
-  <button onclick="login()">Login</button>
+  <form id="loginForm">
+      Email: <input type="email" id="loginEmail" required><br>
+      Password: <input type="password" id="loginPassword" required>
+      <div class="checkbox-container">
+        <label><input type="checkbox" onclick="togglePassword()"> Show Password</label>
+        <label><input type="checkbox" checked> Remember me</label>
+      </div>
+      <button type="button" onclick="login()">Login</button>
+  </form>
+
   <p>New user? <a href="register.html">Register here</a></p>
 </div>
 
 <script>
-function login() {
-  const usernameInput = document.getElementById('username').value.trim();
-  const passwordInput = document.getElementById('password').value;
-
-  const users = JSON.parse(localStorage.getItem('users')) || {};
-  let found = false;
-
-  for (const key in users) {
-    const user = users[key];
-    if (user.username === usernameInput && user.password === passwordInput) {
-      localStorage.setItem('loggedInUser', key); 
-      alert('Login successful!');
-      window.location.href = 'dasboard.html';
-      found = true;
-      break;
-    }
+  function togglePassword() {
+      let password = document.getElementById("loginPassword");
+      password.type = password.type === "password" ? "text" : "password";
   }
 
-  if (!found) {
-    alert('Invalid username or password!');
-  }
-}
+  function login() {
+      let email = document.getElementById("loginEmail").value.trim();
+      let password = document.getElementById("loginPassword").value.trim();
+      let users = JSON.parse(localStorage.getItem("users")) || [];
 
-function togglePassword() {
-  const passwordField = document.getElementById('password');
-  passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
-}
+      let foundUser = users.find(user => user.email === email && user.password === password);
+      if (foundUser) {
+          localStorage.setItem("currentUser", JSON.stringify(foundUser));
+          alert('Login successful! Redirecting to dasboard...');
+          window.location.href = "dasboard.html";
+      } else {
+          alert("Invalid email or password!");
+      }
+  }
 </script>
 
 </body>
