@@ -82,10 +82,10 @@
   function login() {
       let email = document.getElementById("loginEmail").value.trim();
       let password = document.getElementById("loginPassword").value.trim();
-      let users = JSON.parse(localStorage.getItem("users")) || [];
+      let users = JSON.parse(localStorage.getItem("users")) ?? {};
 
-      let foundUser = users.find(user => user.email === email && user.password === password);
-      if (foundUser) {
+      let foundUser = users[email];
+      if (foundUser.password === password) {
           localStorage.setItem("currentUser", JSON.stringify(foundUser));
           alert('Login successful! Redirecting to dasboard...');
           window.location.href = "dasboard.html";
