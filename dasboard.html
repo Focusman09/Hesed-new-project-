@@ -43,13 +43,14 @@
 
     <h2>Add Entry</h2>
     <form id="entryForm">
-      Firm Name: <input type="text" id="firmName" required><br>
-      Location: <input type="text" id="location" required><br>
-      Years in Operation: <input type="number" id="years" required><br>
-      Description: <input type="text" id="description" required><br>
-      Contact Person: <input type="text" id="contactPerson" required><br>
-      Email: <input type="email" id="email" required><br>
-      Phone: <input type="tel" id="phone" required><br>
+      Firm Name: <input type="text" id="firmName" placeholder="Enter firmName" required><br>
+      Location: <input type="text" id="location" placeholder="Firm Location" required><br>
+      Years in Operation: <input type="number" id="years" placeholder="Years of exitence" required><br>
+      Description: <input type="text" id="description"  placeholder="Firm Description" required><br>
+      Contact Person: <input type="text" id="contactPerson" placeholder="Name of contactPerson" required><br>
+      Email: <input type="email" id="email" placeholder="Firm Email" required><br>
+      Phone: <input type="tel" id="phone" placeholder="Phone number" required><br>
+      Date of Brith: <input type="date" id="DOB" placeholder="Date of opening" required><br>
       <button type="button" onclick="addEntry()">Add Entry</button>
     </form>
 
@@ -65,6 +66,7 @@
           <th>Contact Person</th>
           <th>Email</th>
           <th>Phone</th>
+          <th>DOB</th>
           <th>Edit</th>
           <th>Delete</th>
         </tr>
@@ -89,7 +91,7 @@
       </select>
 
       <h4>Select Payment Method</h4>
-      <select id="paymentMethod" onchange="togglePaymentDetails()">
+      <select id="paymentMethod" onchange="togglePaymentDetails()" aria-placeholder="select paymentMethod">
         <option value="Bank Transfer">Bank Transfer</option>
         <option value="Card">Card</option>
         <option value="Online Payment">Online Payment</option>
@@ -122,6 +124,7 @@
         <th>Contact Person</th>
         <th>Nation</th>
         <th>Phone</th>
+        <th>DOB</th>
         <th>Payment Mode</th>
         <th>Actions</th>
       </tr>
@@ -157,8 +160,9 @@
       let contactPerson = document.getElementById("contactPerson").value.trim();
       let email = document.getElementById("email").value.trim();
       let phone = document.getElementById("phone").value.trim();
+      let DOB = document.getElementById("DOB").value.trim()
 
-      if (!firmName || !location || !years || !description || !contactPerson || !email || !phone) {
+      if (!firmName || !location || !years || !description || !contactPerson || !email || !phone || !DOB) {
         alert("Please fill all fields before submitting.");
         return;
       }
@@ -174,6 +178,7 @@
         contactPerson,
         email,
         phone,
+        DOB,
         user: currentUser.email
       };
 
@@ -201,6 +206,7 @@
           <td>${entry.contactPerson}</td>
           <td>${entry.email}</td>
           <td>${entry.phone}</td>
+          <td>${entry.DOB}</td>
           <td><button onclick="editEntry(${entry.id})">Edit</button></td>
           <td><button onclick="deleteEntry(${entry.id})">Delete</button></td>
         </tr>`;
@@ -237,6 +243,8 @@
           <input type="email" id="editEmail" value="${entry.email}" readonly><br>
           <label>Phone:</label><br>
           <input type="tel" id="editPhone" value="${entry.phone}" readonly><br><br>
+          <label>DOB:</label><br>
+          <input type="date" id="editDOB" value="${entry.DOB}" readonly><br><br>
           <button id="modifyBtn">Modify</button>
           <button id="doneBtn" disabled>Done</button>
           <button onclick="closeModal('editModal')">Cancel</button>
@@ -253,6 +261,7 @@
         document.getElementById("editContactPerson").readOnly = false;
         document.getElementById("editEmail").readOnly = false;
         document.getElementById("editPhone").readOnly = false;
+        document.getElementById("editDOB").readOnly = false;
         document.getElementById("doneBtn").disabled = false;
       });
 
@@ -265,6 +274,7 @@
         entry.contactPerson = document.getElementById("editContactPerson").value.trim();
         entry.email = document.getElementById("editEmail").value.trim();
         entry.phone = document.getElementById("editPhone").value.trim();
+        entry.DOB = document.getElementById("editDOB").value.trim();
 
         // Save the updated entries back to localStorage.
         let allEntries = JSON.parse(localStorage.getItem("entries")) || [];
